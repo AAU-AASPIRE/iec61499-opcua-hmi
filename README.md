@@ -102,7 +102,6 @@ and of every module headlessly (under Xvfb), open62541 1.5.4 is built single thr
 
 ```
 run.py                 command line entry point: simulator, links and web server on one event loop
-modlink/               async OPC UA access to the modules, for the HMI and for agents (below)
 hmi/profiles.py        declarative address space of each module (built in, or from the AAS)
 hmi/aas.py             the module descriptions from the modules' AAS (file or AAS repository)
 hmi/model.py           PackML states, skill states, error codes, button rules, diagrams
@@ -189,6 +188,8 @@ tests/                 unit tests and end to end tests against the simulator
 
 `modlink` is the OPC UA side of the HMI on its own, asyncio only and without
 anything of the web app, so an agent (or a script) drives a module the same way.
+It is in [aaspire-tools](https://github.com/AAU-AASPIRE/aaspire-tools) with the other tools
+(until 25 Nov 2026 it was here); its tests there run against this repository's simulator.
 Given the module's AAS it needs no knowledge of the address space: it follows
 the references of the AAS from an offered capability to the skill realizing it
 and on to the browse paths that skill's commands and properties are at.
@@ -255,8 +256,7 @@ documents, including that every state of both machines appears in the diagrams.
 one (or `IEC61499_MGMT_PY`) and checks the profiles against the module specs in
 `cell/modules`, the state and error numbers against `modgen`, and the command
 rules and the skill diagram against the generated `MOD_StateLogic` and
-`SKILL_Control`; it is skipped without that checkout. `tests/test_modlink.py`
-checks discovery, the method calls, a quiet connection and an agent running skills, `tests/test_simulator.py` the simulated
+`SKILL_Control`; it is skipped without that checkout. `tests/test_simulator.py` checks the simulated
 equipment against the module specs.
 `tests/test_integration.py` and `tests/test_reconnect.py` start the simulator and
 drive the whole API: occupy/release, reset/start/execute, skill starts, equipment
