@@ -1,6 +1,6 @@
 """The module descriptions built from the modules' AAS (hmi/aas.py).
 
-The AAS in tests/data are what iec61499-mgmt-py's modreg registers for the two modules
+The AAS in tests/data are what modreg (aaspire-tools) registers for the two modules
 (tools/aas_fixtures.py writes them). Built from them, the profiles must describe the same address
 space as the hand-written ones in hmi/profiles.py, and the same skills, sequences and procedures.
 """

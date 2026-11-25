@@ -1,6 +1,6 @@
 """The HMI's module descriptions from the modules' AAS.
 
-A module registers its AAS (iec61499-mgmt-py: ``modreg``) in the structure of the resource
+A module registers its AAS (``modreg``, aaspire-tools) in the structure of the resource
 ontology: the Skills submodel (skills, their parameters, sequences and occupied equipment, the
 module's procedures), Hierarchical Structures (the equipment) and the Asset Interfaces Description
 (the OPC UA endpoint and the browse path of every method and variable). That is everything the

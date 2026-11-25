@@ -1,17 +1,17 @@
 """Write the AAS of the filling and stoppering modules as test data (tests/data/*08.json.gz).
 
-Built by iec61499-mgmt-py's modreg from the module specs, as a registration builds it (ARSO 0.8:
+Built by modreg (aaspire-tools) from the module specs, as a registration builds it (ARSO 0.8:
 the module's AAS and one for every component of it, in one environment), without the embedded data
 specifications (the class and attribute names aas-model repeats on every element, which nothing
 here reads). ``*07.json.gz`` are the same modules in ARSO 0.7 (8 Oct 2026: the kind of a skill as its
 semantic id, a Module submodel), kept to test that they are still read.
 ``FillingModule08-reconfigured.json.gz`` is the filling module after a skill written in the web
-UI's skill editor was built online and recorded (written by iec61499-mgmt-py, 9 Oct 2026; not by
-this tool).
+UI's skill editor was built online and recorded (written by modsync, 9 Oct 2026; not by this
+tool).
 ``FillingModuleAAS.json.gz`` and ``StopperingModuleAAS.json.gz`` are the modules as
 they were before 8 Oct 2026 (ARSO 0.6, the ESP32 stations' skills), which the HMI's built-in
-descriptions and its simulator still are; they cannot be written again. Needs a checkout of iec61499-mgmt-py next to this repository (or
-IEC61499_MGMT_PY) with its registration extra installed:
+descriptions and its simulator still are; they cannot be written again. Needs aaspire-tools installed and the line's module specs (the
+aseptic line beside this repository, or ``MODGEN_CELL``):
 
     python tools/aas_fixtures.py
 """
@@ -21,11 +21,9 @@ from __future__ import annotations
 import gzip
 import json
 import os
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MGMT = Path(os.environ.get("IEC61499_MGMT_PY", ROOT.parent / "iec61499-mgmt-py"))
 OUT = ROOT / "tests" / "data"
 MODULES = ("filling", "stoppering")
 
@@ -40,9 +38,7 @@ def strip(element):
 
 def environment(module: str) -> dict:
     """The AAS environment modreg registers for a module's pi target."""
-    for part in ("iec61499-skill-lib", "iec61499-mgmt-py", "aas61499-tools"):
-        if str(MGMT / part) not in sys.path:
-            sys.path.insert(0, str(MGMT / part))
+    os.environ.setdefault("MODGEN_CELL", str(ROOT.parent / "aseptic-line" / "cell"))
     from modgen import SPECS, load
     from modreg import model, profile
 

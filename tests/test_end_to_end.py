@@ -1,6 +1,6 @@
 """The whole flow, with the real parts: FORTE module -> its AAS -> the HMI.
 
-1. 4diac FORTE (tools/forte/build.sh) runs the filling module of iec61499-mgmt-py on its Modbus
+1. 4diac FORTE (tools/forte/build.sh) runs the aseptic line's filling module on its Modbus
    simulator (cell/sim/run_module.py, target pc).
 2. ``modsync pull --register`` reads the running module, compares it with its spec and sends its
    profile to ``modreg serve``, which builds the AAS, checks it against the ontology (ARSO) and
@@ -16,8 +16,9 @@ Skipped unless the parts are there:
     BASYX_JAR=basyx.aasenvironment.component-2.0.0-milestone-15-exec.jar \\  (or BASYX_URL=http://host:8081)
     python -m pytest tests/test_end_to_end.py
 
-It needs a checkout of iec61499-mgmt-py next to this one (or IEC61499_MGMT_PY), installed with its
-registration extra, and the ports FORTE and the simulator use (61499, 4840, 1502) free.
+It needs the aseptic line and the ontologies beside this repository (or ``AASPIRE_LINE`` and
+``AASPIRE_ONTOLOGIES``), aaspire-tools installed, and the ports FORTE and the simulator use (61499,
+4840, 1502) free.
 """
 
 from __future__ import annotations
@@ -47,7 +48,8 @@ from modlink import aas as modlink_aas
 from test_integration import SESSION, free_port, skill_command, to_execute, view, wait_for, wait_skill
 
 ROOT = Path(__file__).resolve().parents[1]
-MGMT = Path(os.environ.get("IEC61499_MGMT_PY", ROOT.parent / "iec61499-mgmt-py"))
+LINE = Path(os.environ.get("AASPIRE_LINE") or ROOT.parent / "aseptic-line")
+ONTOLOGIES = Path(os.environ.get("AASPIRE_ONTOLOGIES") or ROOT.parent / "ontologies")
 FORTE = os.environ.get("FORTE_BIN", "")
 BASYX_JAR = os.environ.get("BASYX_JAR", "")
 BASYX_URL = os.environ.get("BASYX_URL", "")
@@ -64,11 +66,13 @@ def missing() -> str:
         return "FORTE_BIN does not name a FORTE binary (tools/forte/build.sh)"
     if not BASYX_URL and not (BASYX_JAR and Path(BASYX_JAR).is_file()):
         return "neither BASYX_URL nor BASYX_JAR is given"
-    if not (MGMT / "cell" / "sim" / "run_module.py").is_file():
-        return f"no iec61499-mgmt-py checkout at {MGMT}"
+    if not (LINE / "cell" / "sim" / "run_module.py").is_file():
+        return f"no aseptic line at {LINE}"
+    if not (ONTOLOGIES / "ARSO").is_dir():
+        return f"no ontologies at {ONTOLOGIES}"
     probe = subprocess.run([sys.executable, "-c", "import modreg.model, modsync"], capture_output=True)
     if probe.returncode:
-        return "modreg and modsync are not installed (pip install -e iec61499-mgmt-py[registration])"
+        return "modreg and modsync are not installed (pip install -e aaspire-tools)"
     if busy := [p for p in PORTS if in_use(p)]:
         return f"ports in use: {busy}"
     return ""
@@ -99,7 +103,7 @@ def flow(tmp_path_factory):
 
     def start(args: list[str], name: str) -> subprocess.Popen:
         log = (work / f"{name}.log").open("wb")
-        process = subprocess.Popen(args, cwd=MGMT, stdout=log, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(args, cwd=LINE, stdout=log, stderr=subprocess.STDOUT)
         processes.append(process)
         return process
 
@@ -114,12 +118,12 @@ def flow(tmp_path_factory):
         until(lambda: answers(f"{basyx}/shells"), 120, "the AAS server")
         registry = f"http://127.0.0.1:{free_port()}"
         start([sys.executable, "-m", "modreg", "serve", "--listen", registry.rsplit(":", 1)[1],
-               "--store", str(work / "registry"), "--ontology", "ontology/ARSO", "--basyx", basyx], "modreg")
+               "--store", str(work / "registry"), "--ontology", str(ONTOLOGIES / "ARSO"), "--basyx", basyx], "modreg")
         until(lambda: answers(f"{registry}/health"), 60, "the registration service")
         pulled = subprocess.run(
             [sys.executable, "-m", "modsync", "pull", "--spec", "cell/modules/filling.yaml", "--target", "pc",
              "--host", "127.0.0.1", "--out", str(work / "aas"), "--register", registry],
-            cwd=MGMT, capture_output=True, text=True, timeout=300)
+            cwd=LINE, capture_output=True, text=True, timeout=300)
         yield {"basyx": basyx, "registry": registry, "pull": pulled, "work": work}
     finally:
         for process in reversed(processes):

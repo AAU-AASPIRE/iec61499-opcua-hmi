@@ -152,7 +152,7 @@ SKILL_STATES_ALLOWED_TO_START = frozenset({SK_IDLE, SK_SUCCEEDED, SK_FAILED})
 
 # --- Diagrams --------------------------------------------------------------
 #
-# Both machines are the ones the controller runs (iec61499-mgmt-py, ModLib:
+# Both machines are the ones the controller runs (ModLib in aaspire-tools:
 # MOD_StateLogic and SKILL_Control); "SC" is state complete.
 
 MODULE_DIAGRAM: tuple[tuple[int, int, str], ...] = (

@@ -1,10 +1,9 @@
-"""The HMI against the controller it operates (iec61499-mgmt-py).
+"""The HMI against the controller it operates.
 
-Reads the module specifications (cell/modules/*.yaml), the state and error
-tables of the generator (modgen/library.py) and the generated state machines
-(MOD_StateLogic, SKILL_Control) and checks that the profiles and the command
-rules of the HMI are the same. Skipped unless a checkout of iec61499-mgmt-py is
-next to this one or named by IEC61499_MGMT_PY.
+Reads the module specifications (cell/modules/*.yaml of the line: aseptic-line beside this
+repository, or ``$MODGEN_CELL``), the state and error tables of the generator (modgen/library.py,
+aaspire-tools) and the generated state machines (MOD_StateLogic, SKILL_Control) and checks that the
+profiles and the command rules of the HMI are the same. Skipped without the line or modgen.
 """
 
 from __future__ import annotations
@@ -13,6 +12,7 @@ import ast
 import os
 import re
 import xml.etree.ElementTree as ET
+from importlib.util import find_spec
 from pathlib import Path
 
 import pytest
@@ -23,13 +23,15 @@ from hmi import profiles as prof
 yaml = pytest.importorskip("yaml")
 
 ROOT = Path(__file__).resolve().parents[1]
-MGMT = Path(os.environ.get("IEC61499_MGMT_PY", ROOT.parent / "iec61499-mgmt-py"))
-SPECS = MGMT / "cell" / "modules"
-CONTROL = MGMT / "cell" / "control"
-LIBRARY = MGMT / "iec61499-skill-lib" / "modgen" / "library.py"
+CELL = Path(os.environ.get("MODGEN_CELL") or ROOT.parent / "aseptic-line" / "cell")
+SPECS = CELL / "modules"
+CONTROL = CELL / "control"
+MODGEN = find_spec("modgen")
+LIBRARY = Path(MODGEN.origin).parent / "library.py" if MODGEN else None
 
 pytestmark = pytest.mark.skipif(
-    not SPECS.is_dir(), reason="no iec61499-mgmt-py checkout (set IEC61499_MGMT_PY)"
+    not SPECS.is_dir() or LIBRARY is None,
+    reason="no line beside this repository (aseptic-line, or set MODGEN_CELL) or no modgen (aaspire-tools)",
 )
 
 MODULES = {"filling": "filling.yaml", "stoppering": "stoppering.yaml"}

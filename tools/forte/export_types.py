@@ -1,5 +1,5 @@
-"""Linux version of iec61499-mgmt-py's runtime/build-modules.ps1 and validate.ps1: export ModLib and
-every module project with the 4diac IDE (headless, under Xvfb) and post-process the exports the
+"""Linux version of forte-runtime's build-modules.ps1 and validate.ps1: export ModLib and
+every module project of the line (aseptic-line beside this repository) with the 4diac IDE (headless, under Xvfb) and post-process the exports the
 same way (generic comm FBs and unexported types removed, forte-compat headers, links).
 
     python export_types.py WORK_DIR [PROJECT ...]     # WORK_DIR holds 4diac-ide/; exports go to WORK_DIR/modules
@@ -9,13 +9,12 @@ import re
 import shutil
 import subprocess
 import sys
-import os
 import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MGMT = Path(os.environ.get("IEC61499_MGMT_PY", ROOT.parent / "iec61499-mgmt-py"))
-RUNTIME = MGMT / "runtime"
+RUNTIME = ROOT.parent / "forte-runtime"
+LINE = ROOT.parent / "aseptic-line"
 WORK = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
 IDE = WORK / "4diac-ide" / "4diac-ide"
 OUT = WORK / "modules"
@@ -73,7 +72,7 @@ endforeach ()
 
 
 def main() -> None:
-    listing = subprocess.run([sys.executable, "-m", "modgen", "--list"], cwd=MGMT, check=True,
+    listing = subprocess.run([sys.executable, "-m", "modgen", "--list"], cwd=LINE, check=True,
                              capture_output=True, text=True).stdout.split()
     wanted = set(sys.argv[2:])
     for line in listing:

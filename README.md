@@ -55,7 +55,7 @@ simulated Stoppering module).
 
 ## Modules from their AAS
 
-A module registers its AAS (iec61499-mgmt-py: `modsync pull --register` sends its profile to
+A module registers its AAS (aaspire-tools: `modsync pull --register` sends its profile to
 `modreg serve`, which builds the AAS, checks it against the resource ontology and publishes it to
 the AAS server). The AAS holds everything the HMI shows, so `--aas` builds the module
 descriptions from it (`hmi/aas.py`) instead of taking the built-in ones (`hmi/profiles.py`):
@@ -93,10 +93,11 @@ FORTE_BIN=../forte-build/build-forte/forte/forte \
 BASYX_JAR=basyx.aasenvironment.component-2.0.0-milestone-15-exec.jar python -m pytest tests/test_end_to_end.py
 ```
 
-`tools/forte/build.sh` does on Linux what iec61499-mgmt-py's `runtime/build-modules.ps1` and
+`tools/forte/build.sh` does on Linux what forte-runtime's `build-modules.ps1` and
 `build-runtime.ps1` do on Windows with the FBE: the 4diac IDE 3.3.0 exports the types of ModLib
 and of every module headlessly (under Xvfb), open62541 1.5.4 is built single threaded, and FORTE
-3.3.0 with the repository's patches is built with OPC UA, Modbus, IO, GPIO and PWM.
+3.3.0 with forte-runtime's patches is built with OPC UA, Modbus, IO, GPIO and PWM. It takes
+forte-runtime and the aseptic line from beside this repository, ModLib and modgen from aaspire-tools.
 
 ## How it works
 
@@ -109,7 +110,7 @@ hmi/service.py         occupation, command results, message log, snapshot for th
 hmi/app.py             FastAPI routes and the WebSocket that pushes snapshots
 hmi/static             the HMI page: diagram.js (state machine drawings), hmi.js, hmi.css
 sim/fake_module.py     simulated controller built from the same profiles
-tools/                 AAS test data from iec61499-mgmt-py; FORTE for Linux (tools/forte)
+tools/                 AAS test data from modreg; FORTE for Linux (tools/forte)
 tests/                 unit tests and end to end tests against the simulator
 ```
 
@@ -252,11 +253,11 @@ python -m pytest -q
 `tests/test_model.py` and `tests/test_profiles.py` check the state machines,
 error codes, button rules and the address space against the specification
 documents, including that every state of both machines appears in the diagrams.
-`tests/test_controller_sync.py` reads a checkout of iec61499-mgmt-py next to this
-one (or `IEC61499_MGMT_PY`) and checks the profiles against the module specs in
+`tests/test_controller_sync.py` reads the aseptic line beside this repository (or
+`MODGEN_CELL`) and checks the profiles against the module specs in
 `cell/modules`, the state and error numbers against `modgen`, and the command
 rules and the skill diagram against the generated `MOD_StateLogic` and
-`SKILL_Control`; it is skipped without that checkout. `tests/test_simulator.py` checks the simulated
+`SKILL_Control`; it is skipped without the line. `tests/test_simulator.py` checks the simulated
 equipment against the module specs.
 `tests/test_integration.py` and `tests/test_reconnect.py` start the simulator and
 drive the whole API: occupy/release, reset/start/execute, skill starts, equipment

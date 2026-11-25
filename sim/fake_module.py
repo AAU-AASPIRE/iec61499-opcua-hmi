@@ -1,7 +1,7 @@
 """Simulated OPC UA server that serves the address space described by a profile.
 
 Development stand-in for the Eclipse 4diac controller: same nodes, same state
-machines (MOD_StateLogic and SKILL_Control of iec61499-mgmt-py), same error
+machines (MOD_StateLogic and SKILL_Control of ModLib), same error
 codes, and the equipment of cell/modules/filling.yaml and stoppering.yaml with
 the kinematics of cell/sim/module_sim.py: axes with their travel time, dead time
 and end switches, and a servo without feedback. The scale goes beyond the module

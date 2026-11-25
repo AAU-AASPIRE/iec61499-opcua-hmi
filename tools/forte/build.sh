@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# 4diac FORTE 3.3.0 for Linux (x86_64) with ModLib and every module of iec61499-mgmt-py, without
-# the FBE: what runtime/build-modules.ps1 and build-runtime.ps1 do on Windows, for the end to end
+# 4diac FORTE 3.3.0 for Linux (x86_64) with ModLib and every module of the aseptic line, without the
+# FBE: what forte-runtime's build-modules.ps1 and build-runtime.ps1 do on Windows, for the end to end
 # test (tests/test_end_to_end.py) and for running the modules on a Linux PC.
 #
 #   tools/forte/build.sh [WORK_DIR]          # default ../forte-build; prints the binary's path
 #
 # Needs git, a C/C++ compiler, CMake >= 3.30 (pip install cmake), Java (for the 4diac IDE),
-# xvfb-run and libmodbus-dev, and a checkout of iec61499-mgmt-py next to this repository (or
-# IEC61499_MGMT_PY). Every step is skipped when its result is there already.
+# xvfb-run and libmodbus-dev, aaspire-tools installed, and forte-runtime and aseptic-line beside this
+# repository. Every step is skipped when its result is there already.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
-MGMT="${IEC61499_MGMT_PY:-$REPO/../iec61499-mgmt-py}"
+RUNTIME="$REPO/../forte-runtime"
 WORK="$(mkdir -p "${1:-$REPO/../forte-build}" && cd "${1:-$REPO/../forte-build}" && pwd)"
 FORTE_TAG=3.3.0
 OPEN62541_TAG=v1.5.4          # the version FORTE 3.3.0 asks for
@@ -26,9 +26,9 @@ if [ ! -x 4diac-ide/4diac-ide ]; then
 fi
 
 if [ ! -d forte ]; then
-    echo "4diac FORTE $FORTE_TAG with the patches of iec61499-mgmt-py"
+    echo "4diac FORTE $FORTE_TAG with the patches of forte-runtime"
     git -c advice.detachedHead=false clone -q --depth 1 --branch "$FORTE_TAG" https://github.com/eclipse-4diac/4diac-forte.git forte
-    for patch in "$MGMT"/runtime/forte-patches/*.patch; do git -C forte apply "$patch"; done
+    for patch in "$RUNTIME"/forte-patches/*.patch; do git -C forte apply "$patch"; done
 fi
 
 if [ ! -f prefix/lib/libopen62541.a ]; then
