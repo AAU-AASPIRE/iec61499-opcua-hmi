@@ -1,10 +1,13 @@
+<img src=".github/icon.png" alt="" width="96" align="right">
+
 # iec61499-opcua-hmi
 
 A small OPC UA HMI in Python (FastAPI + [asyncua](https://github.com/FreeOpcUa/opcua-asyncio))
 for the IEC 61499 modules of the Eclipse 4diac controller. It shows the PackML
 module state machine, the skills with their parameters and results, the step
 progress of the sequences and the procedures, the sensors, and it operates the
-module through methods only.
+module through methods only. Part of [AASPIRE](https://github.com/AAU-AASPIRE/aaspire)'s
+interfaces; until 25 Nov 2026 it was the AAU Smart Production Lab's.
 
 Both modules described in the specification documents are supported:
 
